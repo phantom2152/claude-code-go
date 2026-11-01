@@ -53,7 +53,7 @@ func main() {
 	}
 	client = openai.NewClient(option.WithAPIKey(apiKey), option.WithBaseURL(baseUrl))
 
-	response := runAgent(messages)
+	response := runAgent(messages, mainTools)
 
 	fmt.Println(response)
 }

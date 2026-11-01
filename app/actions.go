@@ -66,7 +66,7 @@ func get_skills_body(name, args string) string {
 				messages := []openai.ChatCompletionMessageParamUnion{
 					openai.UserMessage(body),
 				}
-				resp := runAgent(messages)
+				resp := runAgent(messages, subagentTools)
 				return fmt.Sprintf("Skill %s ran in a separate context and returned: %s", s.Name, resp)
 			}
 			return body

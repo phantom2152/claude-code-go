@@ -7,9 +7,9 @@ import (
 	"github.com/openai/openai-go/v3"
 )
 
-func runAgent(messages []openai.ChatCompletionMessageParamUnion) string {
+func runAgent(messages []openai.ChatCompletionMessageParamUnion, tools []openai.ChatCompletionToolUnionParam) string {
 	for i := range 20 { //this is to avoid rate limiting for openrouter
-		resp := send_message(messages)
+		resp := send_message(messages, tools)
 		msg := resp.Choices[0].Message
 		messages = append(messages, msg.ToParam())
 

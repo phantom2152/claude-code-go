@@ -93,3 +93,6 @@ func skillChatTool() openai.ChatCompletionToolUnionParam {
 
 	return openai.ChatCompletionFunctionTool(funcDef)
 }
+
+var mainTools = []openai.ChatCompletionToolUnionParam{readFileChatTool(), writeFileChatTool(), bashChatTool(), skillChatTool()}
+var subagentTools = []openai.ChatCompletionToolUnionParam{readFileChatTool(), writeFileChatTool(), bashChatTool()}

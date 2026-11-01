@@ -10,13 +10,13 @@ var apiKey string
 var baseUrl string
 var modelToUSe string
 
-func send_message(messages []openai.ChatCompletionMessageParamUnion) openai.ChatCompletion {
+func send_message(messages []openai.ChatCompletionMessageParamUnion, tools []openai.ChatCompletionToolUnionParam) openai.ChatCompletion {
 	resp, err := client.Chat.Completions.New(
 		context.Background(),
 		openai.ChatCompletionNewParams{
 			Model:    modelToUSe,
 			Messages: messages,
-			Tools:    []openai.ChatCompletionToolUnionParam{readFileChatTool(), writeFileChatTool(), bashChatTool(), skillChatTool()},
+			Tools:    tools,
 		},
 	)
 
