@@ -21,12 +21,18 @@ func main() {
 
 	apiKey := os.Getenv("OPENROUTER_API_KEY")
 	baseUrl := os.Getenv("OPENROUTER_BASE_URL")
+	modelToUSe := os.Getenv("MODEL_TO_USE")
+
 	if baseUrl == "" {
 		baseUrl = "https://openrouter.ai/api/v1"
 	}
 
 	if apiKey == "" {
 		panic("Env variable OPENROUTER_API_KEY not found")
+	}
+
+	if modelToUSe == "" {
+		modelToUSe = "anthropic/claude-haiku-4.5"
 	}
 
 	client := openai.NewClient(option.WithAPIKey(apiKey), option.WithBaseURL(baseUrl))
@@ -42,6 +48,22 @@ func main() {
 						},
 					},
 				},
+			},
+			Tools: []openai.ChatCompletionToolUnionParam{
+				openai.ChatCompletionFunctionTool(openai.FunctionDefinitionParam{
+					Name:        "Read",
+					Description: openai.String("Read and return the contents of a file"),
+					Parameters: openai.FunctionParameters{
+						"type": "object",
+						"properties": map[string]any{
+							"file_path": map[string]any{
+								"type":        "string",
+								"description": "The path to the file to read",
+							},
+						},
+						"required": []string{"file_path"},
+					},
+				}),
 			},
 		},
 	)
