@@ -48,7 +48,7 @@ func writeFileChatTool() openai.ChatCompletionToolUnionParam {
 	return openai.ChatCompletionFunctionTool(funcDef)
 }
 
-func bashFileChatTool() openai.ChatCompletionToolUnionParam {
+func bashChatTool() openai.ChatCompletionToolUnionParam {
 	parameters := map[string]any{
 		"type": "object",
 		"properties": map[string]any{
@@ -63,6 +63,31 @@ func bashFileChatTool() openai.ChatCompletionToolUnionParam {
 	funcDef := openai.FunctionDefinitionParam{
 		Name:        "Bash",
 		Description: openai.String("Execute a shell command"),
+		Parameters:  parameters,
+	}
+
+	return openai.ChatCompletionFunctionTool(funcDef)
+}
+
+func skillChatTool() openai.ChatCompletionToolUnionParam {
+	parameters := map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"name": map[string]any{
+				"type":        "string",
+				"description": "The name of the skill to use",
+			},
+			"args": map[string]any{
+				"type":        "string",
+				"description": "Optional arguments for the skill",
+			},
+		},
+		"required": []string{"name"},
+	}
+
+	funcDef := openai.FunctionDefinitionParam{
+		Name:        "Skill",
+		Description: openai.String("Load a skill's instructions into the conversation"),
 		Parameters:  parameters,
 	}
 

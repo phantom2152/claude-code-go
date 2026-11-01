@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -49,4 +51,20 @@ func execute_bash_command(command string) string {
 	}
 
 	return string(out)
+}
+
+func get_skills_body(name, args string, skills []Skill) string {
+	strings.TrimPrefix(name, "/")
+	for _, s := range skills {
+		if s.Name == name {
+			body := buildBody(s.Body, args)
+			return buildUserMessage(s, body)
+		}
+	}
+
+	names := make([]string, 0, len(skills))
+	for _, s := range skills {
+		names = append(names, s.Name)
+	}
+	return fmt.Sprintf("error: skill %q not found. Available skills: %s", name, strings.Join(names, ", "))
 }

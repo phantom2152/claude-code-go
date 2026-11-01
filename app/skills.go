@@ -72,6 +72,7 @@ func skillsSystemPrompt(skills []Skill) string {
 	for _, s := range skills {
 		fmt.Fprintf(&b, "- %s: %s\n", s.Name, s.Description)
 	}
+	fmt.Fprintf(&b, "\nIf a skill matches the user's request, call the Skill tool with its name and follow the instructions it returns.\n")
 	return b.String()
 }
 

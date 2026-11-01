@@ -62,7 +62,7 @@ func main() {
 		}
 
 		for _, tool := range tool_calls {
-			contents, err := callTool(tool)
+			contents, err := callTool(tool, skills)
 			if err != nil {
 				contents = "error: " + err.Error()
 			}

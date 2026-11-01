@@ -48,3 +48,19 @@ func executeBashTool(tool openai.ChatCompletionMessageToolCallUnion) string {
 
 	return output
 }
+
+func executeSkillTool(tool openai.ChatCompletionMessageToolCallUnion, skills []Skill) string {
+	var arguments struct {
+		Name string `json:"name"`
+		Args string `json:"args"`
+	}
+
+	if err := json.Unmarshal([]byte(tool.Function.Arguments), &arguments); err != nil {
+		panic(err)
+	}
+
+	skillBody := get_skills_body(arguments.Name, arguments.Args, skills)
+
+	return skillBody
+
+}

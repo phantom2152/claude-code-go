@@ -16,7 +16,7 @@ func send_message(client *openai.Client, messages []openai.ChatCompletionMessage
 		openai.ChatCompletionNewParams{
 			Model:    modelToUSe,
 			Messages: messages,
-			Tools:    []openai.ChatCompletionToolUnionParam{readFileChatTool(), writeFileChatTool(), bashFileChatTool()},
+			Tools:    []openai.ChatCompletionToolUnionParam{readFileChatTool(), writeFileChatTool(), bashChatTool(), skillChatTool()},
 		},
 	)
 
