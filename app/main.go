@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
@@ -9,6 +10,26 @@ import (
 	"github.com/openai/openai-go/v3"
 	"github.com/openai/openai-go/v3/option"
 )
+
+func checkToolCall(choices []openai.ChatCompletionChoice) string {
+	for _, call := range choices[0].Message.ToolCalls {
+		if call.Type != "function" || call.Function.Name != "Read" {
+			continue
+		}
+
+		var arguments struct {
+			FilePath string `json:"file_path"`
+		}
+
+		if err := json.Unmarshal([]byte(call.Function.Arguments), &arguments); err != nil {
+			panic(err)
+		}
+
+		fileContents := read_file(arguments.FilePath)
+		return fileContents
+	}
+	return ""
+}
 
 func main() {
 	var prompt string
@@ -49,22 +70,7 @@ func main() {
 					},
 				},
 			},
-			Tools: []openai.ChatCompletionToolUnionParam{
-				openai.ChatCompletionFunctionTool(openai.FunctionDefinitionParam{
-					Name:        "Read",
-					Description: openai.String("Read and return the contents of a file"),
-					Parameters: openai.FunctionParameters{
-						"type": "object",
-						"properties": map[string]any{
-							"file_path": map[string]any{
-								"type":        "string",
-								"description": "The path to the file to read",
-							},
-						},
-						"required": []string{"file_path"},
-					},
-				}),
-			},
+			Tools: []openai.ChatCompletionToolUnionParam{readFileChatTool()},
 		},
 	)
 	if err != nil {
@@ -75,9 +81,40 @@ func main() {
 		panic("No choices in response")
 	}
 
+	fc := checkToolCall(resp.Choices)
+
 	// You can use print statements as follows for debugging, they'll be visible when running tests.
 	fmt.Fprintln(os.Stderr, "Logs from your program will appear here!")
 
-	// TODO: Uncomment the line below to pass the first stage
-	fmt.Print(resp.Choices[0].Message.Content)
+	fmt.Println(fc)
+}
+
+func readFileChatTool() openai.ChatCompletionToolUnionParam {
+	parameters := map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"file_path": map[string]any{
+				"type":        "string",
+				"description": "The path to the file to read",
+			},
+		},
+		"required": []string{"file_path"},
+	}
+
+	funcDef := openai.FunctionDefinitionParam{
+		Name:        "Read",
+		Description: openai.String("Read and return the contents of a file"),
+		Parameters:  parameters,
+	}
+
+	return openai.ChatCompletionFunctionTool(funcDef)
+}
+
+func read_file(path string) string {
+	bytes, err := os.ReadFile(path)
+	if err != nil {
+		panic("Cant read file")
+	}
+
+	return string(bytes)
 }
