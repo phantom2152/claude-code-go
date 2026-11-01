@@ -43,7 +43,7 @@ func parseSkill(path string) (Skill, error) {
 	}
 
 	s.Body = strings.TrimSpace(strings.TrimPrefix(rest[end+len("\n---"):], "\n"))
-	s.Dir = filepath.Base(filepath.Dir(path))
+	s.Dir = filepath.Dir(path)
 	return s, nil
 }
 
@@ -111,6 +111,10 @@ func buildBody(rawBody, rawArgs string) string {
 
 }
 
+func buildUserMessage(s Skill, body string) string {
+	return fmt.Sprintf("Skill: %s (located at %s)\nPaths in the instructions below are relative to that folder.\n\n%s", s.Name, s.Dir, body)
+}
+
 func expandPrompt(prompt string, skills []Skill) []string {
 	byName := make(map[string]Skill, len(skills))
 	for _, s := range skills {
@@ -136,7 +140,8 @@ func expandPrompt(prompt string, skills []Skill) []string {
 
 	bodies := make([]string, 0, len(matched))
 	for _, s := range matched {
-		bodies = append(bodies, buildBody(s.Body, rest))
+		body := buildBody(s.Body, rest)
+		bodies = append(bodies, buildUserMessage(s, body))
 	}
 
 	return bodies
