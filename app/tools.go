@@ -22,3 +22,28 @@ func readFileChatTool() openai.ChatCompletionToolUnionParam {
 
 	return openai.ChatCompletionFunctionTool(funcDef)
 }
+
+func writeFileChatTool() openai.ChatCompletionToolUnionParam {
+	parameters := map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"file_path": map[string]any{
+				"type":        "string",
+				"description": "The path of the file to write to",
+			},
+			"content": map[string]any{
+				"type":        "string",
+				"description": "The content to write to the file",
+			},
+		},
+		"required": []string{"file_path", "content"},
+	}
+
+	funcDef := openai.FunctionDefinitionParam{
+		Name:        "Write",
+		Description: openai.String("Write content to a file"),
+		Parameters:  parameters,
+	}
+
+	return openai.ChatCompletionFunctionTool(funcDef)
+}
