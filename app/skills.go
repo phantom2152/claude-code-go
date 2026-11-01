@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"gopkg.in/yaml.v1"
@@ -73,19 +75,54 @@ func skillsSystemPrompt(skills []Skill) string {
 	return b.String()
 }
 
+// This will do 3 alternative checks once $ is hit
+// First it will check for ARGUMENTS with [] and capture any digits inside
+// If [] not there then it will be satisfied by just ARGUMENTS
+// lastly it will look for any piece with digits after $ thats the third alternative
+var placeHolderRe = regexp.MustCompile(`\$(?:ARGUMENTS\[(\d+)\]|ARGUMENTS|(\d+))`)
+
+func buildBody(rawBody, rawArgs string) string {
+	args := strings.Fields(rawArgs)
+
+	return placeHolderRe.ReplaceAllStringFunc(rawBody, func(m string) string {
+
+		//This will hold all matches
+		// [0] will hold full string
+		// [1] will hold first capture group(inside []) if there else ""
+		// [2] will hold second capture group next to $
+		sub := placeHolderRe.FindStringSubmatch(m)
+		idxStr := sub[1]
+		if idxStr == "" {
+			idxStr = sub[2]
+		}
+
+		if idxStr == "" {
+			return rawArgs
+		}
+
+		idx, err := strconv.Atoi(idxStr)
+		if err != nil || idx >= len(args) {
+			return m
+		}
+
+		return args[idx]
+
+	})
+
+}
+
 func getSkillBody(prompt string, skills []Skill) string {
 	if !strings.HasPrefix(prompt, "/") {
 		return prompt
 	}
 
-	name, args, _ := strings.Cut(strings.TrimPrefix(prompt, "/"), " ")
-	args = strings.TrimSpace(args)
+	name, rawArgs, _ := strings.Cut(strings.TrimPrefix(prompt, "/"), " ")
+	rawArgs = strings.TrimSpace(rawArgs)
 
 	for _, skill := range skills {
 		if skill.Name == name {
-			return skill.Body
+			return buildBody(skill.Body, rawArgs)
 		}
 	}
-
 	return prompt
 }
