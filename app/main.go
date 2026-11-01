@@ -32,7 +32,7 @@ func main() {
 	client := openai.NewClient(option.WithAPIKey(apiKey), option.WithBaseURL(baseUrl))
 	resp, err := client.Chat.Completions.New(context.Background(),
 		openai.ChatCompletionNewParams{
-			Model:     "openrouter/free",
+			Model:     "anthropic/claude-haiku-4.5",
 			MaxTokens: openai.Int(4096),
 			Messages: []openai.ChatCompletionMessageParamUnion{
 				{
