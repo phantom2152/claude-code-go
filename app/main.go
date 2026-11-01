@@ -81,12 +81,13 @@ func main() {
 		panic("No choices in response")
 	}
 
-	fc := checkToolCall(resp.Choices)
+	if len(resp.Choices[0].Message.ToolCalls) == 0 {
+		fmt.Println(resp.Choices[0].Message.Content)
+	} else {
+		fc := checkToolCall(resp.Choices)
+		fmt.Println(fc)
+	}
 
-	// You can use print statements as follows for debugging, they'll be visible when running tests.
-	fmt.Fprintln(os.Stderr, "Logs from your program will appear here!")
-
-	fmt.Println(fc)
 }
 
 func readFileChatTool() openai.ChatCompletionToolUnionParam {
