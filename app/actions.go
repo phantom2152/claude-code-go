@@ -56,7 +56,7 @@ func execute_bash_command(command string) string {
 }
 
 func get_skills_body(name, args string) string {
-	strings.TrimPrefix(name, "/")
+	name = strings.TrimPrefix(name, "/")
 	for _, s := range skills {
 		if s.Name == name {
 			body := buildBody(s.Body, args)
@@ -67,7 +67,7 @@ func get_skills_body(name, args string) string {
 					openai.UserMessage(body),
 				}
 				resp := runAgent(messages)
-				return "Skill apple ran in a separate context and returned: " + resp
+				return fmt.Sprintf("Skill %s ran in a separate context and returned: %s", s.Name, resp)
 			}
 			return body
 		}
