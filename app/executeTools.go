@@ -49,7 +49,7 @@ func executeBashTool(tool openai.ChatCompletionMessageToolCallUnion) string {
 	return output
 }
 
-func executeSkillTool(tool openai.ChatCompletionMessageToolCallUnion, skills []Skill) string {
+func executeSkillTool(tool openai.ChatCompletionMessageToolCallUnion) string {
 	var arguments struct {
 		Name string `json:"name"`
 		Args string `json:"args"`
@@ -59,7 +59,7 @@ func executeSkillTool(tool openai.ChatCompletionMessageToolCallUnion, skills []S
 		panic(err)
 	}
 
-	skillBody := get_skills_body(arguments.Name, arguments.Args, skills)
+	skillBody := get_skills_body(arguments.Name, arguments.Args)
 
 	return skillBody
 

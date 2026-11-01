@@ -27,6 +27,9 @@ func initEnv() {
 	}
 }
 
+var client openai.Client
+var skills []Skill
+
 func main() {
 	var prompt string
 	flag.StringVar(&prompt, "p", "", "Prompt to send to LLM")
@@ -37,7 +40,7 @@ func main() {
 		panic("Prompt must not be empty")
 	}
 
-	skills := loadSkills()
+	skills = loadSkills()
 
 	messages := []openai.ChatCompletionMessageParamUnion{}
 
@@ -48,26 +51,9 @@ func main() {
 	for _, body := range expandPrompt(prompt, skills) {
 		messages = append(messages, openai.UserMessage(body))
 	}
-	client := openai.NewClient(option.WithAPIKey(apiKey), option.WithBaseURL(baseUrl))
+	client = openai.NewClient(option.WithAPIKey(apiKey), option.WithBaseURL(baseUrl))
 
-	for {
-		resp := send_message(&client, messages)
-		msg := resp.Choices[0].Message
-		messages = append(messages, msg.ToParam()) //Needed for maintaing tool call history
-		tool_calls := msg.ToolCalls
+	response := runAgent(messages)
 
-		if len(tool_calls) == 0 {
-			fmt.Println(msg.Content)
-			break
-		}
-
-		for _, tool := range tool_calls {
-			contents, err := callTool(tool, skills)
-			if err != nil {
-				contents = "error: " + err.Error()
-			}
-
-			messages = append(messages, openai.ToolMessage(contents, tool.ID))
-		}
-	}
+	fmt.Println(response)
 }

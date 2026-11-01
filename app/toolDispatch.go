@@ -6,7 +6,7 @@ import (
 	"github.com/openai/openai-go/v3"
 )
 
-func callTool(tool openai.ChatCompletionMessageToolCallUnion, skills []Skill) (string, error) {
+func callTool(tool openai.ChatCompletionMessageToolCallUnion) (string, error) {
 	if tool.Type != "function" {
 		return "", fmt.Errorf("Not a tool with function call\n")
 	}
@@ -22,7 +22,7 @@ func callTool(tool openai.ChatCompletionMessageToolCallUnion, skills []Skill) (s
 		contents := executeBashTool(tool)
 		return contents, nil
 	case "Skill":
-		contents := executeSkillTool(tool, skills)
+		contents := executeSkillTool(tool)
 		return contents, nil
 	default:
 		return "", fmt.Errorf("No such function\n")

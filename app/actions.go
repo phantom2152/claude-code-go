@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/openai/openai-go/v3"
 )
 
 func read_file(path string) string {
@@ -53,12 +55,21 @@ func execute_bash_command(command string) string {
 	return string(out)
 }
 
-func get_skills_body(name, args string, skills []Skill) string {
+func get_skills_body(name, args string) string {
 	strings.TrimPrefix(name, "/")
 	for _, s := range skills {
 		if s.Name == name {
 			body := buildBody(s.Body, args)
-			return buildUserMessage(s, body)
+			body = buildUserMessage(s, body)
+
+			if s.Context == "fork" {
+				messages := []openai.ChatCompletionMessageParamUnion{
+					openai.UserMessage(body),
+				}
+				resp := runAgent(messages)
+				return "Skill apple ran in a separate context and returned: " + resp
+			}
+			return body
 		}
 	}
 

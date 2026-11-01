@@ -10,7 +10,7 @@ var apiKey string
 var baseUrl string
 var modelToUSe string
 
-func send_message(client *openai.Client, messages []openai.ChatCompletionMessageParamUnion) openai.ChatCompletion {
+func send_message(messages []openai.ChatCompletionMessageParamUnion) openai.ChatCompletion {
 	resp, err := client.Chat.Completions.New(
 		context.Background(),
 		openai.ChatCompletionNewParams{

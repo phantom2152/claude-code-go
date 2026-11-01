@@ -14,6 +14,7 @@ import (
 type Skill struct {
 	Name        string `yaml:"name"`
 	Description string `yaml:"description"`
+	Context     string `yaml:"context"`
 	Dir         string `yaml:"-"`
 	Body        string `yaml:"-"`
 }
