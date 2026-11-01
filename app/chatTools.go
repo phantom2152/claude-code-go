@@ -47,3 +47,24 @@ func writeFileChatTool() openai.ChatCompletionToolUnionParam {
 
 	return openai.ChatCompletionFunctionTool(funcDef)
 }
+
+func bashFileChatTool() openai.ChatCompletionToolUnionParam {
+	parameters := map[string]any{
+		"type": "object",
+		"properties": map[string]any{
+			"command": map[string]any{
+				"type":        "string",
+				"description": "The command to execute",
+			},
+		},
+		"required": []string{"command"},
+	}
+
+	funcDef := openai.FunctionDefinitionParam{
+		Name:        "Bash",
+		Description: openai.String("Execute a shell command"),
+		Parameters:  parameters,
+	}
+
+	return openai.ChatCompletionFunctionTool(funcDef)
+}

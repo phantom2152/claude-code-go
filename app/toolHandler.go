@@ -18,6 +18,9 @@ func callTool(tool openai.ChatCompletionMessageToolCallUnion) (string, error) {
 	case "Write":
 		contents := executeWriteTool(tool)
 		return contents, nil
+	case "Bash":
+		contents := executeBashTool(tool)
+		return contents, nil
 	default:
 		return "", fmt.Errorf("No such function\n")
 	}

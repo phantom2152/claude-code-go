@@ -34,3 +34,17 @@ func executeWriteTool(tool openai.ChatCompletionMessageToolCallUnion) string {
 
 	return fileContents
 }
+
+func executeBashTool(tool openai.ChatCompletionMessageToolCallUnion) string {
+	var arguments struct {
+		Command string `json:"command"`
+	}
+
+	if err := json.Unmarshal([]byte(tool.Function.Arguments), &arguments); err != nil {
+		panic(err)
+	}
+
+	output := execute_bash_command(arguments.Command)
+
+	return output
+}

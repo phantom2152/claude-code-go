@@ -1,8 +1,11 @@
 package main
 
 import (
+	"context"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"time"
 )
 
 func read_file(path string) string {
@@ -26,4 +29,24 @@ func write_to_file(path, contents string) string {
 	}
 
 	return "File written successfully"
+}
+
+func execute_bash_command(command string) string {
+	//To make sure the agents will not freeze the terminal for undefined amount of time
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, "bash", "-c", command)
+
+	out, err := cmd.CombinedOutput()
+
+	if ctx.Err() == context.DeadlineExceeded {
+		return string(out) + "\nerror: command timed out after 30s"
+	}
+
+	if err != nil {
+		return string(out) + "\nerror: " + err.Error()
+	}
+
+	return string(out)
 }
