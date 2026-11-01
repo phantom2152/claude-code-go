@@ -72,3 +72,20 @@ func skillsSystemPrompt(skills []Skill) string {
 	}
 	return b.String()
 }
+
+func getSkillBody(prompt string, skills []Skill) string {
+	if !strings.HasPrefix(prompt, "/") {
+		return prompt
+	}
+
+	name, args, _ := strings.Cut(strings.TrimPrefix(prompt, "/"), " ")
+	args = strings.TrimSpace(args)
+
+	for _, skill := range skills {
+		if skill.Name == name {
+			return skill.Body
+		}
+	}
+
+	return prompt
+}

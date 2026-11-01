@@ -37,13 +37,15 @@ func main() {
 		panic("Prompt must not be empty")
 	}
 
+	skills := loadSkills()
+
 	messages := []openai.ChatCompletionMessageParamUnion{}
 
-	if sp := skillsSystemPrompt(loadSkills()); sp != "" {
+	if sp := skillsSystemPrompt(skills); sp != "" {
 		messages = append(messages, openai.SystemMessage(sp))
 	}
 
-	messages = append(messages, openai.UserMessage(prompt))
+	messages = append(messages, openai.UserMessage(getSkillBody(prompt, skills)))
 	client := openai.NewClient(option.WithAPIKey(apiKey), option.WithBaseURL(baseUrl))
 
 	for {
