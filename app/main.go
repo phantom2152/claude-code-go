@@ -45,7 +45,9 @@ func main() {
 		messages = append(messages, openai.SystemMessage(sp))
 	}
 
-	messages = append(messages, openai.UserMessage(getSkillBody(prompt, skills)))
+	for _, body := range expandPrompt(prompt, skills) {
+		messages = append(messages, openai.UserMessage(body))
+	}
 	client := openai.NewClient(option.WithAPIKey(apiKey), option.WithBaseURL(baseUrl))
 
 	for {

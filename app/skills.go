@@ -111,18 +111,33 @@ func buildBody(rawBody, rawArgs string) string {
 
 }
 
-func getSkillBody(prompt string, skills []Skill) string {
-	if !strings.HasPrefix(prompt, "/") {
-		return prompt
+func expandPrompt(prompt string, skills []Skill) []string {
+	byName := make(map[string]Skill, len(skills))
+	for _, s := range skills {
+		byName[s.Name] = s
 	}
 
-	name, rawArgs, _ := strings.Cut(strings.TrimPrefix(prompt, "/"), " ")
-	rawArgs = strings.TrimSpace(rawArgs)
+	rest := strings.TrimSpace(prompt)
+	var matched []Skill
 
-	for _, skill := range skills {
-		if skill.Name == name {
-			return buildBody(skill.Body, rawArgs)
+	for strings.HasPrefix(rest, "/") {
+		token, after, _ := strings.Cut(rest, " ")
+		skill, ok := byName[strings.TrimPrefix(token, "/")]
+		if !ok {
+			break
 		}
+		matched = append(matched, skill)
+		rest = strings.TrimSpace(after)
 	}
-	return prompt
+
+	if len(matched) == 0 {
+		return []string{prompt}
+	}
+
+	bodies := make([]string, 0, len(matched))
+	for _, s := range matched {
+		bodies = append(bodies, buildBody(s.Body, rest))
+	}
+
+	return bodies
 }
