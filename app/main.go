@@ -37,20 +37,23 @@ func main() {
 		panic("Prompt must not be empty")
 	}
 
-	messages := []openai.ChatCompletionMessageParamUnion{
-		openai.UserMessage(prompt),
+	messages := []openai.ChatCompletionMessageParamUnion{}
+
+	if sp := skillsSystemPrompt(loadSkills()); sp != "" {
+		messages = append(messages, openai.SystemMessage(sp))
 	}
 
+	messages = append(messages, openai.UserMessage(prompt))
 	client := openai.NewClient(option.WithAPIKey(apiKey), option.WithBaseURL(baseUrl))
 
 	for {
 		resp := send_message(&client, messages)
 		msg := resp.Choices[0].Message
 		messages = append(messages, msg.ToParam()) //Needed for maintaing tool call history
-		tool_calls := resp.Choices[0].Message.ToolCalls
+		tool_calls := msg.ToolCalls
 
 		if len(tool_calls) == 0 {
-			fmt.Println(resp.Choices[0].Message.Content)
+			fmt.Println(msg.Content)
 			break
 		}
 
