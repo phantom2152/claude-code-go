@@ -1,34 +1,58 @@
-[![progress-banner](https://backend.codecrafters.io/progress/claude-code/1f63bbe7-6472-4030-b204-d273417186eb)](https://app.codecrafters.io/users/phantom2152?r=2qF)
+# claude-code-go
 
-This is a starting point for Go solutions to the
-["Build Your own Claude Code" Challenge](https://codecrafters.io/challenges/claude-code).
+A minimal Claude Code-style coding agent in Go, built by following the CodeCrafters ["Build Your Own Claude Code"](https://codecrafters.io/challenges/claude-code) challenge.
 
-Claude Code is an AI coding assistant that uses Large Language Models (LLMs) to
-understand code and perform actions through tool calls. In this challenge,
-you'll build your own Claude Code from scratch by implementing an LLM-powered
-coding assistant.
+It talks to any OpenAI-compatible API (OpenRouter by default) and runs an agent loop: send messages, execute the tool calls the model asks for, feed results back, repeat until it answers.
 
-Along the way you'll learn about HTTP RESTful APIs, OpenAI-compatible tool
-calling, agent loop, and how to integrate multiple tools into an AI assistant.
+## Features
 
-**Note**: If you're viewing this repo on GitHub, head over to
-[codecrafters.io](https://codecrafters.io) to try the challenge.
+- **Agent loop** with a 20-iteration cap
+- **Tools:** `Read`, `Write`, `Bash` (30s timeout), `Skill`
+- **Skills:** `.claude/skills/<name>/SKILL.md` with YAML frontmatter
+    - advertised to the model via the system prompt (name + description only)
+    - invoked by the user (`/name args`) or chosen by the model via the `Skill` tool
+    - `$ARGUMENTS`, `$ARGUMENTS[N]` and `$N` placeholders
+    - stacking: `/apple /grape 4127`
+    - `context: fork` runs a skill in a subagent with its own conversation
 
-# Passing the first stage
-
-The entry point for your `claude-code` implementation is in `app/main.go`. Study
-and uncomment the relevant code, and submit to pass the first stage:
+## Usage
 
 ```sh
-codecrafters submit
+export OPENROUTER_API_KEY=...
+export MODEL_TO_USE=anthropic/claude-haiku-4.5   # optional, any tool-calling model
+
+./your_program.sh -p "Read main.go and summarize it"
+./your_program.sh -p "/apple staging eu-west"
 ```
 
-# Stage 2 & beyond
+| Variable              | Default                        |
+| --------------------- | ------------------------------ |
+| `OPENROUTER_API_KEY`  | required                       |
+| `OPENROUTER_BASE_URL` | `https://openrouter.ai/api/v1` |
+| `MODEL_TO_USE`        | `anthropic/claude-haiku-4.5`   |
 
-Note: This section is for stages 2 and beyond.
+## Skill format
 
-1. Ensure you have `go (1.27)` installed locally.
-2. Run `./your_program.sh` to run your program, which is implemented in
-   `app/main.go`.
-3. Run `codecrafters submit` to submit your solution to CodeCrafters. Test
-   output will be streamed to your terminal.
+```markdown
+---
+name: apple
+description: Use this skill when the user asks about the on-call rotation.
+context: fork # optional: run in a subagent
+---
+
+Deploy to $0 in region $1. Full request: $ARGUMENTS
+```
+
+## Layout
+
+```
+app/
+  main.go           entry point, env, message setup
+  agent.go          the agent loop (also used for subagents)
+  openaiHandler.go  API call
+  chatTools.go      tool definitions
+  toolDispatch.go   routes tool calls
+  executeTools.go   parses tool arguments
+  actions.go        tool implementations
+  skills.go         skill loading, placeholders, prompt expansion
+```
